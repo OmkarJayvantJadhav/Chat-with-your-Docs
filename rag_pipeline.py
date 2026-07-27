@@ -473,8 +473,7 @@ def build_prompt(question: str, retrieved_chunks: list[str]) -> str:
         retrieved_chunks: List of relevant text chunks from the vector store.
 
     Returns:
-        A formatted prompt string including the system instruction, context
-        chunks, and the user's question.
+        A formatted prompt string including context chunks and the user's question.
     """
     if not retrieved_chunks:
         context = "No relevant context was found in the uploaded documents."
@@ -485,7 +484,6 @@ def build_prompt(question: str, retrieved_chunks: list[str]) -> str:
         context = "\n\n".join(context_parts)
 
     prompt = (
-        f"{SYSTEM_PROMPT}\n\n"
         f"--- CONTEXT ---\n{context}\n--- END CONTEXT ---\n\n"
         f"Question: {question}"
     )
