@@ -745,11 +745,13 @@ else:
                 })
 
             try:
+                # Pass the chat history EXCLUDING the current user prompt (since it was just added to the end)
                 stream_gen = stream_answer(
                     question=prompt,
                     context_chunks=documents,
                     model=st.session_state.model_name,
                     api_key=st.session_state.groq_api_key,
+                    chat_history=st.session_state.chat_history[:-1],
                 )
                 answer = st.write_stream(stream_gen)
             except Exception as e:

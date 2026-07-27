@@ -673,6 +673,7 @@ def stream_answer_groq(
     context_chunks: list[str],
     model: str = DEFAULT_GROQ_MODEL,
     api_key: str = "",
+    chat_history: list[dict] | None = None,
 ) -> Generator[str, None, None]:
     """Stream an answer word-by-word using Groq's cloud API."""
     if not api_key:
@@ -681,12 +682,25 @@ def stream_answer_groq(
 
     prompt_content = build_prompt(question, context_chunks)
 
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    # Inject previous chat history for conversational context
+    if chat_history:
+        # Take the last few turns to avoid blowing up the context window
+        recent_history = chat_history[-6:]
+        for msg in recent_history:
+            # We don't want to include the raw retrieved chunks from past assistant messages
+            # to save tokens, just the text response.
+            role = msg.get("role")
+            content = msg.get("content", "")
+            if role and content and not content.startswith("⚠️"):
+                messages.append({"role": role, "content": content})
+
+    messages.append({"role": "user", "content": prompt_content})
+
     payload = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt_content},
-        ],
+        "messages": messages,
         "temperature": 0.2,
         "max_tokens": 1536,
         "stream": True,
@@ -727,10 +741,11 @@ def stream_answer(
     context_chunks: list[str],
     model: str = "",
     api_key: str = "",
+    chat_history: list[dict] | None = None,
 ) -> Generator[str, None, None]:
     """Stream answer generator for Streamlit UI."""
     effective_model = model or DEFAULT_GROQ_MODEL
-    return stream_answer_groq(question, context_chunks, effective_model, api_key)
+    return stream_answer_groq(question, context_chunks, effective_model, api_key, chat_history)
 
 
 # ---------------------------------------------------------------------------
