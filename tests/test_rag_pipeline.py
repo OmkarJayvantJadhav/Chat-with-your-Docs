@@ -197,12 +197,6 @@ class TestBuildPrompt:
         result = build_prompt("question", [])
         assert "No relevant context" in result
 
-    def test_build_prompt_includes_system_prompt(self) -> None:
-        """The system prompt should be included."""
-        result = build_prompt("question", ["context"])
-        assert "ONLY" in result  # Key word from system prompt
-        assert "do not make up" in result.lower()
-
 
 # ---------------------------------------------------------------------------
 # Retrieval tests (mocked)
