@@ -425,38 +425,10 @@ def get_cached_embed_model():
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    # ── API Key ──────────────────────────────────────────────
-    default_key = ""
-    try:
-        default_key = st.secrets.get("GROQ_API_KEY", "")
-    except Exception:
-        pass
+    # ── Authentication ─────────────────────────────────────────
+    st.session_state.groq_api_key = st.secrets.get("GROQ_API_KEY", "")
+    st.session_state.model_name = DEFAULT_GROQ_MODEL
 
-    if default_key:
-        st.session_state.groq_api_key = default_key
-        st.session_state.model_name = DEFAULT_GROQ_MODEL
-    else:
-        st.markdown('<p class="section-label">API Key</p>', unsafe_allow_html=True)
-        api_key = st.text_input(
-            "AI API Key",
-            value=st.session_state.groq_api_key,
-            type="password",
-            placeholder="gsk_...",
-            label_visibility="collapsed",
-            help="Get a free key at https://console.groq.com — no credit card needed.",
-        )
-        st.session_state.groq_api_key = api_key
-
-        if not api_key:
-            st.markdown(
-                '<div style="font-size:0.82rem;color:#94A3B8;margin:6px 0 0 0;">'
-                '🔑 <a href="https://console.groq.com" target="_blank" style="color:#818CF8;text-decoration:none;">Get a free API key →</a>'
-                '</div>',
-                unsafe_allow_html=True,
-            )
-
-        st.session_state.model_name = DEFAULT_GROQ_MODEL
-        st.markdown('<hr class="subtle-divider">', unsafe_allow_html=True)
 
     # ── Upload ───────────────────────────────────────────────
     st.markdown('<p class="section-label">PDF Documents</p>', unsafe_allow_html=True)
@@ -723,10 +695,10 @@ else:
 
         with st.chat_message("assistant"):
             if not st.session_state.groq_api_key:
-                st.error("Enter your API key in the sidebar to start chatting.")
+                st.error("The app administrator has not configured the Groq API key.")
                 st.session_state.chat_history.append({
                     "role": "assistant",
-                    "content": "Please enter your API key in the sidebar.",
+                    "content": "⚠️ The app administrator has not configured the Groq API key.",
                     "sources": [],
                 })
                 st.stop()
